@@ -27,12 +27,6 @@
 #ifndef __MLDT__
 #include <assert.h>
 
-
-/**********************************************************************************
- *																				  *
- *		Structure database defination starts									  *
- *																				  *
- *********************************************************************************/
 #define MAX_STRUCT_NAME_SZ 120
 #define MAX_FIELD_NAME_SZ 120
 
@@ -59,6 +53,12 @@ typedef enum {
 
 #define SIZEOF_FIELD(STRUCT_NAME, FIELD_NAME)		\
 		(sizeof(((STRUCT_NAME*)0)->FIELD_NAME))
+
+/**********************************************************************************
+ *																				  *
+ *		Structure database defination starts									  *
+ *																				  *
+ *********************************************************************************/
 
 /*
  *	Holds information of each feild of structure in c application
@@ -92,21 +92,11 @@ typedef struct struct_db {
 	unsigned int count;								/* number of records in database */
 } struct_db_t;
 
-/**********************************************************************************
- *																				  *
- *		Structure database defination ends										  *
- *																				  *
- *********************************************************************************/
-
-/**********************************************************************************
- *																				  *
- *		Structure database functions prototype											  *
- *																				  *
- *********************************************************************************/
-/* Printing Functions */
+/*
+ *  Structure Printing Functions
+ */
 void print_struct_record (struct_db_rec_t* struct_rec);
 void print_struct_db (struct_db_t *struct_db);
-
 
 /*
  *	Function to add record in staructure database
@@ -116,7 +106,14 @@ void print_struct_db (struct_db_t *struct_db);
 int add_struct_to_struct_db(struct_db_t *struct_db, struct_db_rec_t *struct_record);
 
 /*
- *	Registration helping API's
+ *	Function to search for record in staructure database
+ *  Returns	 record : success
+ *			 NULL : failure
+ */
+struct_db_rec_t* struct_db_lookup(struct_db_t* struct_db, char *struct_name);
+
+/*
+ *	Structure Registration helping API's
  */
 #define FIELD_INFO(struct_name, field_name, dtype, nested_struct_name)		\
 	{	#field_name, dtype, SIZEOF_FIELD(struct_name, field_name),			\
@@ -133,5 +130,53 @@ int add_struct_to_struct_db(struct_db_t *struct_db, struct_db_rec_t *struct_reco
 				assert(0);														\
 			}																	\
 	}while(0);															
+
+/**********************************************************************************
+ *																				  *
+ *		Structure database defination ends										  *
+ *																				  *
+ *********************************************************************************/
+
+/**********************************************************************************
+ *																				  *
+ *		Object database defination starts										  *
+ *																				  *
+ *********************************************************************************/
+
+/*
+ *	Holds the information about object record 
+ */
+typedef struct object_db_rec {
+	struct object_db_rec* next;					/* pointer to next reocrd in list */
+	void *ptr;									/* pointer to memory location */
+	unsigned int units;							/* number of memory chunks */
+	struct_db_rec_t *struct_rec;				/* pointer to structure record */
+} object_db_rec_t;
+
+/*
+ *	Head of the list
+ */
+typedef struct object_db {
+	object_db_rec_t *head;						/* head pointer */
+	struct_db_t *struct_db;						/* pinter to struct db */
+	unsigned int count;							/* count of number of objects in list */	
+} object_db_t;
+
+/*
+ *	Object printing functions
+ */
+void print_object_record (object_db_rec_t* object_rec);
+void print_object_db (object_db_t *object_db);
+
+/**********************************************************************************
+ *																				  *
+ *		Object database defination ends											  *
+ *																				  *
+ *********************************************************************************/
+
+/*
+ *	Function to allocate memory
+ */
+void * xmalloc(object_db_t* object_db, char *struct_name, int units);
 
 #endif /* __MLDT__*/

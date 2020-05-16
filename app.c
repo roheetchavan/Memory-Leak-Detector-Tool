@@ -26,6 +26,7 @@
 #include <memory.h>
 #include <stdlib.h>
 
+
 /* Application Structure's */
 typedef struct emp {
 	char emp_name[30];
@@ -48,7 +49,6 @@ int main(int argc, char **argv) {
 
 	/* Initialize structure database */
 	struct_db_t *struct_db = calloc(1, sizeof(struct_db_t));
-	
 
 	/* Create structure record for emp */
 	static field_info_t emp_fields[] = {
@@ -71,6 +71,14 @@ int main(int argc, char **argv) {
     REGISTER_STRUCT(struct_db, stud_t, stud_fields);
 
 	print_struct_db(struct_db);
+
+	object_db_t *obj_db = calloc(1, sizeof(object_db_t));
+	obj_db->struct_db = struct_db;
+	
+	stud_t *s = xmalloc(obj_db, "stud_t",1);
+	emp_t *e = xmalloc(obj_db, "emp_t", 2);
+
+	print_object_db(obj_db);
 
 	return 0;
 }

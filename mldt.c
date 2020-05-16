@@ -24,18 +24,15 @@
  * =====================================================================================                      
  */                                                            
 
-
-
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "mldt.h"
 #include "css.h"
-
 
 char *DATA_TYPE[] = {"UINT8", "UINT32", "INT32",
 					 "CHAR", "OBJ_PTR", "FLOAT",
 					 "DOUBLE", "OBJ_STRUCT"};
-
 
 void print_struct_record (struct_db_rec_t* struct_record) {
 	int i = 0;
@@ -92,3 +89,93 @@ int add_struct_to_struct_db(struct_db_t *struct_db, struct_db_rec_t *struct_reco
 	struct_db->count++;
 	return 0;
 }
+
+struct_db_rec_t* struct_db_lookup(struct_db_t* struct_db, char *struct_name) {
+	struct_db_rec_t *record = struct_db->head;
+
+	if ((!record) || (!struct_db->count))	return NULL;
+
+	while (record) {
+		if (!strncmp(record->name, struct_name, sizeof(struct_name))) {
+			return record;
+		}
+		record = record->next;
+	}
+	return NULL;
+}
+
+static object_db_rec_t* object_db_lookup(object_db_t* object_db, void *ptr) {
+	object_db_rec_t* head = object_db->head;
+	
+	if (!head)	return NULL;
+	
+	while (head) {
+		if (head->ptr == ptr)
+			return head;
+		head = head->next;
+	}
+	return NULL;
+}
+
+static void  add_object_to_object_db(object_db_t *object_db, void *ptr, int units,
+									 struct_db_rec_t *struct_rec) {
+
+	object_db_rec_t *obj_rec = object_db_lookup(object_db, ptr);
+	
+	/* Don't allow to insert same object twice */
+	assert(!obj_rec);
+	
+	obj_rec = calloc(1, sizeof(object_db_rec_t));
+	obj_rec->next = NULL;
+	obj_rec->ptr = ptr;
+	obj_rec->units = units;
+	obj_rec->struct_rec = struct_rec;
+
+	object_db_rec_t *head = object_db->head;
+	
+	if (!head) {
+		object_db->head = obj_rec;
+		obj_rec->next = NULL;
+		object_db->count++;
+		return;
+	} 
+	
+	obj_rec->next = head;
+	object_db->head = obj_rec;
+	object_db->count++;
+}
+
+void *xmalloc(object_db_t *object_db, char *struct_name, int units) {
+	struct_db_rec_t *struct_rec = struct_db_lookup(object_db->struct_db, struct_name);
+	assert(struct_rec);
+	void *ptr = calloc(units, struct_rec->size);
+	add_object_to_object_db(object_db, ptr, units, struct_rec);
+	return ptr;
+}
+
+void print_object_record(object_db_rec_t* object_rec) {
+	if(!object_rec) return;                                                                                      
+     
+	printf(MAGENTA_COLOR"-----------------------------------------------------------------------------------|\n");
+    printf(YELLOW_COLOR" ptr = %-10p | next = %-10p | units = %-4d | struct_name = %-10s |\n",      
+          object_rec->ptr, object_rec->next, object_rec->units, object_rec->struct_rec->name);                    
+    printf(MAGENTA_COLOR"-----------------------------------------------------------------------------------|\n");	
+}
+
+void print_object_db(object_db_t* object_db) {
+	int i = 0;
+	
+	if (!object_db)	return;
+	
+	object_db_rec_t *record = object_db->head;
+
+	printf("Printing object database\n");
+	printf("No of object db records: %d\n", object_db->count);
+	while (record) {
+		printf("Object No: %d \n", i++);
+		print_object_record(record);
+		record = record->next;
+	}
+}
+
+
