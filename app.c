@@ -76,9 +76,29 @@ int main(int argc, char **argv) {
 	obj_db->struct_db = struct_db;
 	
 	stud_t *s = xmalloc(obj_db, "stud_t",1);
+	strcpy(s->stud_name, "Dav");
+	s->age = 12;
+	s->aggregate = 88.3;
+	s->rollno = 17;
+	s->best_colleage = NULL;
+
 	emp_t *e = xmalloc(obj_db, "emp_t", 2);
+	strcpy(e[0].emp_name, "emp1");
+	strcpy(e[1].emp_name, "emp2");
+	int i;
+	for (i = 0; i < 2; i++) {
+		e[i].emp_id = i+1;
+		e[i].age = i*i + 20;
+		e[i].salary = 3200.99;
+		e[i].mgr = NULL;
+	}
+
 
 	print_object_db(obj_db);
 
+	
+	xfree(obj_db, s);
+	xfree(obj_db, e);
+	
 	return 0;
 }

@@ -167,7 +167,7 @@ typedef struct object_db {
  */
 void print_object_record (object_db_rec_t* object_rec);
 void print_object_db (object_db_t *object_db);
-
+void print_object_record_details(object_db_rec_t *obj_rec);
 /**********************************************************************************
  *																				  *
  *		Object database defination ends											  *
@@ -178,5 +178,6 @@ void print_object_db (object_db_t *object_db);
  *	Function to allocate memory
  */
 void * xmalloc(object_db_t* object_db, char *struct_name, int units);
+void xfree(object_db_t* object_db, void *ptr);
 
 #endif /* __MLDT__*/
